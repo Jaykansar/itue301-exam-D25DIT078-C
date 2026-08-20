@@ -5,6 +5,7 @@ const BooksPage = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -29,20 +30,38 @@ const BooksPage = () => {
     fetchBooks();
   }, []);
 
+  // Filter books based on search query
+  const filteredBooks = data.filter((book) => 
+    book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    book.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #e2e8f0', paddingBottom: '12px', marginBottom: '24px' }}>
-        <h2 style={{ margin: 0, fontSize: '1.75rem', fontWeight: '700' }}>Books Catalog</h2>
-        <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: '500' }}>
-          {data.length} {data.length === 1 ? 'Book' : 'Books'} Registered
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #e2e8f0', paddingBottom: '16px', marginBottom: '32px' }}>
+        <h2 style={{ margin: 0, fontSize: '2rem', fontWeight: '800', letterSpacing: '-0.02em' }}>Books Catalog</h2>
+        <span style={{ fontSize: '0.95rem', color: '#64748b', fontWeight: '600', backgroundColor: '#eeebff', padding: '6px 14px', borderRadius: '9999px', color: '#4f46e5' }}>
+          {filteredBooks.length} of {data.length} Books
         </span>
       </div>
 
+      {/* Modern Search bar wrapper */}
+      <div className="search-wrapper">
+        <input
+          type="text"
+          placeholder="🔍 Search by book title, author, or category..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="search-input"
+        />
+      </div>
+
       {loading && (
-        <div className="text-center" style={{ padding: '60px 0', color: '#64748b' }}>
-          <div style={{ display: 'inline-block', width: '32px', height: '32px', border: '3px solid #e2e8f0', borderTopColor: '#3b82f6', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: '16px' }}></div>
+        <div className="text-center" style={{ padding: '80px 0', color: '#64748b' }}>
+          <div style={{ display: 'inline-block', width: '36px', height: '36px', border: '3px solid #e2e8f0', borderTopColor: '#4f46e5', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: '16px' }}></div>
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-          <div>Loading catalog records...</div>
+          <div style={{ fontWeight: '500' }}>Loading library catalog...</div>
         </div>
       )}
 
@@ -52,15 +71,17 @@ const BooksPage = () => {
         </div>
       )}
 
-      {!loading && !error && data.length === 0 && (
-        <div className="text-center" style={{ padding: '40px', color: '#64748b' }}>
-          No books found in the library database.
+      {!loading && !error && filteredBooks.length === 0 && (
+        <div className="text-center" style={{ padding: '60px 20px', color: '#64748b', backgroundColor: '#ffffff', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+          <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🔎</div>
+          <div style={{ fontWeight: '600', color: '#0f172a', marginBottom: '4px' }}>No Results Found</div>
+          <div>We couldn't find any books matching "{searchQuery}".</div>
         </div>
       )}
 
-      {!loading && !error && data.length > 0 && (
+      {!loading && !error && filteredBooks.length > 0 && (
         <div className="book-grid">
-          {data.map((book, index) => (
+          {filteredBooks.map((book, index) => (
             <BookCard
               key={book._id || book.isbn || index}
               title={book.title}
